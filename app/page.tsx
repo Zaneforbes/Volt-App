@@ -134,7 +134,6 @@ const statRows: [string, string][] = [
   ["Open interest", selected.oi],
   ["Spread", "$0.14"],
   ["Delta", ".42"],
-];
   ];
   const contributionRows: [string, string, string, string][] = [
     ["Underlying move", "+$1.12", "61%", "High"],
