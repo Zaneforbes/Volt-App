@@ -13,10 +13,42 @@ import {
 } from "lucide-react";
 
 const watchlist = [
-  { ticker: "NVDA", contract: "150C · Jun 19", price: "$12.84", move: "+18.4%", iv: "61.2%", volume: "14.2K", oi: "8.9K" },
-  { ticker: "TSLA", contract: "210C · Jul 17", price: "$9.12", move: "+7.9%", iv: "58.4%", volume: "22.4K", oi: "12.1K" },
-  { ticker: "PLTR", contract: "38C · May 16", price: "$3.48", move: "-2.1%", iv: "64.9%", volume: "31.6K", oi: "27.8K" },
-  { ticker: "MSFT", contract: "445C · Aug 21", price: "$14.31", move: "+5.2%", iv: "34.1%", volume: "8.1K", oi: "5.4K" },
+  {
+    ticker: "NVDA",
+    contract: "150C · Jun 19",
+    price: "$12.84",
+    move: "+18.4%",
+    iv: "61.2%",
+    volume: "14.2K",
+    oi: "8.9K",
+  },
+  {
+    ticker: "TSLA",
+    contract: "210C · Jul 17",
+    price: "$9.12",
+    move: "+7.9%",
+    iv: "58.4%",
+    volume: "22.4K",
+    oi: "12.1K",
+  },
+  {
+    ticker: "PLTR",
+    contract: "38C · May 16",
+    price: "$3.48",
+    move: "-2.1%",
+    iv: "64.9%",
+    volume: "31.6K",
+    oi: "27.8K",
+  },
+  {
+    ticker: "MSFT",
+    contract: "445C · Aug 21",
+    price: "$14.31",
+    move: "+5.2%",
+    iv: "34.1%",
+    volume: "8.1K",
+    oi: "5.4K",
+  },
 ];
 
 const recentJournal = [
@@ -43,7 +75,10 @@ const recentJournal = [
   },
 ];
 
-const chartHeights = [42, 48, 44, 54, 58, 52, 66, 61, 74, 78, 72, 88, 94, 91, 103, 112, 108, 118];
+const chartHeights = [
+  42, 48, 44, 54, 58, 52, 66, 61, 74, 78, 72, 88, 94, 91, 103, 112, 108, 118,
+];
+
 const widthMap: Record<string, string> = {
   "Underlying move": "61%",
   "IV expansion": "29%",
@@ -57,23 +92,42 @@ function getStatMeta(label: string, value: string) {
   const num = parseFloat(String(value).replace(/[^\d.\-]/g, "")) || 0;
 
   if (label === "IVR") {
-    if (num >= 80) return { badge: "Extreme", tone: "border-yellow-500/30 bg-yellow-500/10" };
-    if (num >= 50) return { badge: "Elevated", tone: "border-zinc-700 bg-zinc-900/80" };
+    if (num >= 80) {
+      return { badge: "Extreme", tone: "border-yellow-500/30 bg-yellow-500/10" };
+    }
+    if (num >= 50) {
+      return { badge: "Elevated", tone: "border-zinc-700 bg-zinc-900/80" };
+    }
     return { badge: "Low", tone: "border-zinc-800 bg-transparent" };
   }
+
   if (label === "IVP") {
-    if (num >= 80) return { badge: "Very rich", tone: "border-yellow-500/30 bg-yellow-500/10" };
-    if (num >= 60) return { badge: "Rich", tone: "border-zinc-700 bg-zinc-900/80" };
+    if (num >= 80) {
+      return { badge: "Very rich", tone: "border-yellow-500/30 bg-yellow-500/10" };
+    }
+    if (num >= 60) {
+      return { badge: "Rich", tone: "border-zinc-700 bg-zinc-900/80" };
+    }
     return { badge: null, tone: "border-zinc-800 bg-transparent" };
   }
+
   if (label === "Relative volume") {
-    if (num >= 2) return { badge: "Very active", tone: "border-green-500/30 bg-green-500/10" };
-    if (num >= 1.5) return { badge: "Active", tone: "border-zinc-700 bg-zinc-900/80" };
+    if (num >= 2) {
+      return { badge: "Very active", tone: "border-green-500/30 bg-green-500/10" };
+    }
+    if (num >= 1.5) {
+      return { badge: "Active", tone: "border-zinc-700 bg-zinc-900/80" };
+    }
     return { badge: null, tone: "border-zinc-800 bg-transparent" };
   }
+
   if (label === "Day volume") {
-    if (num >= 50) return { badge: "Heavy", tone: "border-green-500/30 bg-green-500/10" };
-    if (num >= 20) return { badge: "Above avg", tone: "border-zinc-700 bg-zinc-900/80" };
+    if (num >= 50) {
+      return { badge: "Heavy", tone: "border-green-500/30 bg-green-500/10" };
+    }
+    if (num >= 20) {
+      return { badge: "Above avg", tone: "border-zinc-700 bg-zinc-900/80" };
+    }
     return { badge: null, tone: "border-zinc-800 bg-transparent" };
   }
 
@@ -83,29 +137,47 @@ function getStatMeta(label: string, value: string) {
 function getEnvironmentSummary(stats: Record<string, string>) {
   const ivr = parseFloat(stats.IVR || "0") || 0;
   const ivp = parseFloat(stats.IVP || "0") || 0;
-  const relVol = parseFloat(String(stats["Relative volume"] || "0").replace(/[^\d.\-]/g, "")) || 0;
-  const dayVol = parseFloat(String(stats["Day volume"] || "0").replace(/[^\d.\-]/g, "")) || 0;
+  const relVol =
+    parseFloat(String(stats["Relative volume"] || "0").replace(/[^\d.\-]/g, "")) || 0;
+  const dayVol =
+    parseFloat(String(stats["Day volume"] || "0").replace(/[^\d.\-]/g, "")) || 0;
 
   const parts: string[] = [];
-  if (ivr >= 80 || ivp >= 80) parts.push("High IV environment with rich options pricing.");
-  else if (ivr >= 50 || ivp >= 60) parts.push("Moderately elevated implied volatility environment.");
-  else parts.push("Calmer implied volatility environment.");
 
-  if (relVol >= 2 || dayVol >= 50) parts.push("Participation is unusually strong and flow looks active.");
-  else if (relVol >= 1.5 || dayVol >= 20) parts.push("Participation is above average with decent contract activity.");
-  else parts.push("Participation looks fairly normal right now.");
+  if (ivr >= 80 || ivp >= 80) {
+    parts.push("High IV environment with rich options pricing.");
+  } else if (ivr >= 50 || ivp >= 60) {
+    parts.push("Moderately elevated implied volatility environment.");
+  } else {
+    parts.push("Calmer implied volatility environment.");
+  }
 
-  if (ivr >= 70 && relVol >= 1.5) parts.push("Expect faster repricing, wider swings, and more sensitivity to vol changes.");
-  else if (ivr < 40 && relVol < 1.2) parts.push("This setup is more likely to be driven by direction than by vol expansion.");
-  else parts.push("Watch both underlying movement and volatility for the next major repricing.");
+  if (relVol >= 2 || dayVol >= 50) {
+    parts.push("Participation is unusually strong and flow looks active.");
+  } else if (relVol >= 1.5 || dayVol >= 20) {
+    parts.push("Participation is above average with decent contract activity.");
+  } else {
+    parts.push("Participation looks fairly normal right now.");
+  }
+
+  if (ivr >= 70 && relVol >= 1.5) {
+    parts.push("Expect faster repricing, wider swings, and more sensitivity to vol changes.");
+  } else if (ivr < 40 && relVol < 1.2) {
+    parts.push("This setup is more likely to be driven by direction than by vol expansion.");
+  } else {
+    parts.push("Watch both underlying movement and volatility for the next major repricing.");
+  }
 
   return parts.join(" ");
 }
 
 function StatRow({ label, value }: { label: string; value: string }) {
   const meta = getStatMeta(label, value);
+
   return (
-    <div className={`flex items-center justify-between rounded-2xl border px-4 py-3 ${meta.tone}`}>
+    <div
+      className={`flex items-center justify-between rounded-2xl border px-4 py-3 ${meta.tone}`}
+    >
       <span className="text-sm text-zinc-400">{label}</span>
       <div className="flex items-center gap-2">
         {meta.badge ? (
@@ -121,20 +193,27 @@ function StatRow({ label, value }: { label: string; value: string }) {
 
 function MockDashboard() {
   const selected = watchlist[0];
-  const stats = { IVR: "48", IVP: "72", "Relative volume": "1.9x", "Day volume": "18.6K" };
+  const stats = {
+    IVR: "48",
+    IVP: "72",
+    "Relative volume": "1.9x",
+    "Day volume": "18.6K",
+  };
   const environmentSummary = getEnvironmentSummary(stats);
-const statRows: [string, string][] = [
-  ["Last", selected.price],
-  ["Implied vol", selected.iv],
-  ["IVR", stats.IVR],
-  ["IVP", stats.IVP],
-  ["Relative volume", stats["Relative volume"]],
-  ["Day volume", stats["Day volume"]],
-  ["Volume", selected.volume],
-  ["Open interest", selected.oi],
-  ["Spread", "$0.14"],
-  ["Delta", ".42"],
+
+  const statRows: [string, string][] = [
+    ["Last", selected.price],
+    ["Implied vol", selected.iv],
+    ["IVR", stats.IVR],
+    ["IVP", stats.IVP],
+    ["Relative volume", stats["Relative volume"]],
+    ["Day volume", stats["Day volume"]],
+    ["Volume", selected.volume],
+    ["Open interest", selected.oi],
+    ["Spread", "$0.14"],
+    ["Delta", ".42"],
   ];
+
   const contributionRows: [string, string, string, string][] = [
     ["Underlying move", "+$1.12", "61%", "High"],
     ["IV expansion", "+$0.54", "29%", "Medium"],
@@ -156,6 +235,7 @@ const statRows: [string, string][] = [
             <p className="text-xs text-zinc-500">Options tracking platform</p>
           </div>
         </div>
+
         <div className="hidden items-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-zinc-400 md:flex">
           <Search className="h-4 w-4" />
           <span className="text-sm">Search contracts</span>
@@ -165,48 +245,37 @@ const statRows: [string, string][] = [
       <div className="grid gap-0 xl:grid-cols-[260px_1fr]">
         <aside className="hidden border-r border-zinc-800 p-4 xl:block">
           <div className="space-y-2">
-    {[
-  { label: "Overview", Icon: LineChart },
-  { label: "Journal", Icon: BookOpen },
-  { label: "Alerts", Icon: Bell },
-  { label: "Research", Icon: Sparkles },
-].map(({ label, Icon }, i) => (
-  <button
-    key={label}
-    className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm ${
-      i === 0 ? "bg-white text-zinc-950" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
-    }`}
-  >
-    <span className="flex items-center gap-3">
-      <Icon className="h-4 w-4" />
-      {label}
-    </span>
-    {i === 0 ? <ChevronRight className="h-4 w-4" /> : null}
-  </button>
-))}
-              const IconComp = Icon as React.ComponentType<{ className?: string }>;
-              return (
-                <button
-                  key={String(label)}
-                  className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm ${
-                    i === 0 ? "bg-white text-zinc-950" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
-                  }`}
-                >
-                  <span className="flex items-center gap-3">
-                    <IconComp className="h-4 w-4" />
-                    {label}
-                  </span>
-                  {i === 0 ? <ChevronRight className="h-4 w-4" /> : null}
-                </button>
-              );
-            })}
+            {[
+              { label: "Overview", Icon: LineChart },
+              { label: "Journal", Icon: BookOpen },
+              { label: "Alerts", Icon: Bell },
+              { label: "Research", Icon: Sparkles },
+            ].map(({ label, Icon }, i) => (
+              <button
+                key={label}
+                className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm ${
+                  i === 0
+                    ? "bg-white text-zinc-950"
+                    : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                }`}
+              >
+                <span className="flex items-center gap-3">
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </span>
+                {i === 0 ? <ChevronRight className="h-4 w-4" /> : null}
+              </button>
+            ))}
           </div>
 
           <div className="mt-6 rounded-[1.5rem] border border-zinc-800 bg-zinc-900 p-4">
             <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Watchlist</p>
             <div className="mt-3 space-y-2">
               {watchlist.slice(0, 3).map((item) => (
-                <div key={item.ticker} className="rounded-2xl border border-zinc-800 bg-zinc-950 px-3 py-3">
+                <div
+                  key={item.ticker}
+                  className="rounded-2xl border border-zinc-800 bg-zinc-950 px-3 py-3"
+                >
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-white">{item.ticker}</p>
                     <p className="text-xs text-zinc-500">{item.move}</p>
@@ -233,6 +302,7 @@ const statRows: [string, string][] = [
                   <p className="text-sm font-semibold">{selected.move}</p>
                 </div>
               </div>
+
               <div className="mt-5">
                 <div className="mb-4 flex items-center justify-between">
                   <p className="text-sm font-medium text-zinc-200">Contract history</p>
@@ -240,7 +310,11 @@ const statRows: [string, string][] = [
                 </div>
                 <div className="flex h-64 items-end gap-2 rounded-[1.5rem] bg-zinc-950 p-4">
                   {chartHeights.map((height, i) => (
-                    <div key={i} className="flex-1 rounded-t-2xl bg-white/90" style={{ height: `${height}%` }} />
+                    <div
+                      key={i}
+                      className="flex-1 rounded-t-2xl bg-white/90"
+                      style={{ height: `${height}%` }}
+                    />
                   ))}
                 </div>
               </div>
@@ -252,11 +326,13 @@ const statRows: [string, string][] = [
                   <p className="text-sm font-medium text-white">Contract overview</p>
                   <Sparkles className="h-4 w-4 text-zinc-500" />
                 </div>
+
                 <div className="mt-4 space-y-3">
                   {statRows.map(([label, value]) => (
                     <StatRow key={label} label={label} value={value} />
                   ))}
                 </div>
+
                 <div className="mt-4 rounded-[1.5rem] border border-zinc-800 bg-zinc-950 p-4">
                   <div className="flex items-center justify-between gap-4">
                     <p className="text-sm font-medium text-white">Trade environment</p>
@@ -279,24 +355,34 @@ const statRows: [string, string][] = [
                 </div>
                 <LineChart className="h-4 w-4 text-zinc-500" />
               </div>
+
               <div className="mt-4 rounded-[1.5rem] border border-zinc-800 bg-zinc-950 p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Primary driver</p>
+                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
+                      Primary driver
+                    </p>
                     <p className="mt-2 text-base font-semibold text-white">Underlying move</p>
                   </div>
                   <div className="rounded-2xl border border-zinc-800 px-3 py-2 text-right">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">Actual move</p>
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                      Actual move
+                    </p>
                     <p className="text-sm font-semibold text-white">+$1.84</p>
                   </div>
                 </div>
                 <p className="mt-3 text-sm leading-6 text-zinc-400">
-                  Most of the gain came from directional movement in the underlying, with additional help from IV expansion and a smaller boost from gamma repricing.
+                  Most of the gain came from directional movement in the underlying, with
+                  additional help from IV expansion and a smaller boost from gamma repricing.
                 </p>
               </div>
+
               <div className="mt-4 space-y-3">
                 {contributionRows.map(([label, value, pct, tag]) => (
-                  <div key={label} className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950 p-4">
+                  <div
+                    key={label}
+                    className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950 p-4"
+                  >
                     <div className="flex items-center justify-between gap-4">
                       <div>
                         <p className="text-sm font-medium text-white">{label}</p>
@@ -307,9 +393,13 @@ const statRows: [string, string][] = [
                         <p className="mt-1 text-xs text-zinc-500">{pct}</p>
                       </div>
                     </div>
+
                     <div className="mt-3 flex items-center justify-between gap-3">
                       <div className="h-2 flex-1 overflow-hidden rounded-full bg-zinc-900">
-                        <div className="h-full rounded-full bg-white/90" style={{ width: widthMap[label] || "0%" }} />
+                        <div
+                          className="h-full rounded-full bg-white/90"
+                          style={{ width: widthMap[label] || "0%" }}
+                        />
                       </div>
                       <span className="rounded-full border border-zinc-800 px-2.5 py-1 text-[11px] text-zinc-400">
                         {tag}
@@ -326,9 +416,13 @@ const statRows: [string, string][] = [
                   <p className="text-sm font-medium text-white">Trade journal preview</p>
                   <FileText className="h-4 w-4 text-zinc-500" />
                 </div>
+
                 <div className="mt-4 space-y-3">
                   {recentJournal.map((entry) => (
-                    <div key={entry.title} className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950 p-4">
+                    <div
+                      key={entry.title}
+                      className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950 p-4"
+                    >
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <div className="flex items-center gap-2">
@@ -354,6 +448,7 @@ const statRows: [string, string][] = [
                   <p className="text-sm font-medium text-white">Replay timeline</p>
                   <Clock3 className="h-4 w-4 text-zinc-500" />
                 </div>
+
                 <div className="mt-4 space-y-3">
                   {[
                     ["9:35 AM", "Spread narrowed as volume accelerated"],
@@ -361,7 +456,10 @@ const statRows: [string, string][] = [
                     ["11:24 AM", "IV pushed above session average"],
                     ["1:42 PM", "Contract broke morning high"],
                   ].map(([time, text]) => (
-                    <div key={time} className="rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3">
+                    <div
+                      key={time}
+                      className="rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3"
+                    >
                       <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">{time}</p>
                       <p className="mt-2 text-sm text-zinc-300">{text}</p>
                     </div>
@@ -408,12 +506,22 @@ export default function Home() {
               <p className="text-xs text-zinc-500">Options intelligence for traders</p>
             </div>
           </div>
+
           <nav className="hidden items-center gap-8 text-sm text-zinc-400 md:flex">
-            <a href="#product" className="transition hover:text-white">Product</a>
-            <a href="#features" className="transition hover:text-white">Features</a>
-            <a href="#how-it-works" className="transition hover:text-white">How it works</a>
-            <a href="#waitlist" className="transition hover:text-white">Waitlist</a>
+            <a href="#product" className="transition hover:text-white">
+              Product
+            </a>
+            <a href="#features" className="transition hover:text-white">
+              Features
+            </a>
+            <a href="#how-it-works" className="transition hover:text-white">
+              How it works
+            </a>
+            <a href="#waitlist" className="transition hover:text-white">
+              Waitlist
+            </a>
           </nav>
+
           <button className="rounded-2xl bg-white px-4 py-2 text-sm font-medium text-zinc-950 transition hover:opacity-90">
             Join waitlist
           </button>
@@ -423,18 +531,26 @@ export default function Home() {
       <main>
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_35%)]" />
+
           <div className="mx-auto grid max-w-7xl gap-14 px-6 py-20 lg:grid-cols-[.9fr_1.1fr] lg:px-8 lg:py-28">
             <div className="relative z-10 flex flex-col justify-center">
               <div className="mb-6 inline-flex w-fit items-center rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs font-medium text-zinc-400">
                 Historical options tracking, IV context, and move attribution
               </div>
+
               <h1 className="max-w-3xl text-5xl font-semibold tracking-tight text-white sm:text-6xl">
                 Know what actually moved your option.
               </h1>
+
               <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-400">
-                Volt brings historical contract pricing, IVR, IVP, relative volume, journal review, and real move decomposition into one minimalist website.
+                Volt brings historical contract pricing, IVR, IVP, relative volume,
+                journal review, and real move decomposition into one minimalist website.
               </p>
-              <div className="mt-10 flex max-w-xl flex-col gap-3 sm:flex-row" id="waitlist">
+
+              <div
+                className="mt-10 flex max-w-xl flex-col gap-3 sm:flex-row"
+                id="waitlist"
+              >
                 <input
                   type="email"
                   placeholder="Enter your email"
@@ -444,10 +560,17 @@ export default function Home() {
                   Get early access
                 </button>
               </div>
+
               <div className="mt-10 flex flex-wrap gap-3 text-sm text-zinc-500">
-                <span className="rounded-full border border-zinc-800 px-3 py-1">Historical contract charts</span>
-                <span className="rounded-full border border-zinc-800 px-3 py-1">What moved the contract</span>
-                <span className="rounded-full border border-zinc-800 px-3 py-1">IVR / IVP / Relative Volume</span>
+                <span className="rounded-full border border-zinc-800 px-3 py-1">
+                  Historical contract charts
+                </span>
+                <span className="rounded-full border border-zinc-800 px-3 py-1">
+                  What moved the contract
+                </span>
+                <span className="rounded-full border border-zinc-800 px-3 py-1">
+                  IVR / IVP / Relative Volume
+                </span>
               </div>
             </div>
 
@@ -464,9 +587,14 @@ export default function Home() {
               ["Positioning", "Website-first product"],
               ["Edge", "Explains contract repricing"],
             ].map(([label, value]) => (
-              <div key={label} className="rounded-[2rem] border border-zinc-800 bg-zinc-900 p-6">
+              <div
+                key={label}
+                className="rounded-[2rem] border border-zinc-800 bg-zinc-900 p-6"
+              >
                 <p className="text-sm text-zinc-500">{label}</p>
-                <p className="mt-2 text-2xl font-semibold tracking-tight text-white">{value}</p>
+                <p className="mt-2 text-2xl font-semibold tracking-tight text-white">
+                  {value}
+                </p>
               </div>
             ))}
           </div>
@@ -479,7 +607,8 @@ export default function Home() {
               Built for how options traders actually think.
             </h2>
             <p className="mt-4 text-lg leading-8 text-zinc-400">
-              Everything on the website is centered around understanding the contract itself, not just the underlying ticker.
+              Everything on the website is centered around understanding the contract
+              itself, not just the underlying ticker.
             </p>
           </div>
 
@@ -502,20 +631,41 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-6 py-8 lg:px-8 lg:py-16" id="how-it-works">
+        <section
+          className="mx-auto max-w-7xl px-6 py-8 lg:px-8 lg:py-16"
+          id="how-it-works"
+        >
           <div className="grid gap-6 lg:grid-cols-[.95fr_1.05fr]">
             <div className="rounded-[2rem] border border-zinc-800 bg-zinc-900 p-6 lg:p-8">
-              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">How it works</p>
+              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">
+                How it works
+              </p>
               <h3 className="mt-4 text-3xl font-semibold tracking-tight text-white">
                 See the contract, the environment, and the reason for the move.
               </h3>
+
               <div className="mt-8 space-y-4">
                 {[
-                  ["1", "Track a contract", "Monitor price, IV, volume, spread, and open interest with a clean historical view."],
-                  ["2", "Read the environment", "Use IVR, IVP, relative volume, and day volume to quickly understand whether the setup is calm, elevated, or active."],
-                  ["3", "Review the attribution", "Break the move into direction, volatility, decay, and repricing so you can see why the trade actually worked or failed."],
+                  [
+                    "1",
+                    "Track a contract",
+                    "Monitor price, IV, volume, spread, and open interest with a clean historical view.",
+                  ],
+                  [
+                    "2",
+                    "Read the environment",
+                    "Use IVR, IVP, relative volume, and day volume to quickly understand whether the setup is calm, elevated, or active.",
+                  ],
+                  [
+                    "3",
+                    "Review the attribution",
+                    "Break the move into direction, volatility, decay, and repricing so you can see why the trade actually worked or failed.",
+                  ],
                 ].map(([num, title, text]) => (
-                  <div key={num} className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950 p-4">
+                  <div
+                    key={num}
+                    className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950 p-4"
+                  >
                     <div className="flex items-start gap-4">
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white text-sm font-semibold text-zinc-950">
                         {num}
@@ -531,10 +681,13 @@ export default function Home() {
             </div>
 
             <div className="rounded-[2rem] border border-zinc-800 bg-zinc-900 p-6 lg:p-8">
-              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Why it’s different</p>
+              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">
+                Why it’s different
+              </p>
               <h3 className="mt-4 text-3xl font-semibold tracking-tight text-white">
                 Most tools show options data. Volt interprets it.
               </h3>
+
               <div className="mt-8 space-y-4">
                 {[
                   "Know whether the contract was stock-driven, vol-driven, or theta-dragged.",
@@ -542,7 +695,10 @@ export default function Home() {
                   "Review trades later with timeline notes instead of trying to remember what the chart looked like.",
                   "Keep everything in a dark, minimal website that feels fast and premium instead of cluttered.",
                 ].map((item) => (
-                  <div key={item} className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950 px-4 py-4 text-sm leading-7 text-zinc-300">
+                  <div
+                    key={item}
+                    className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950 px-4 py-4 text-sm leading-7 text-zinc-300"
+                  >
                     {item}
                   </div>
                 ))}
@@ -555,15 +711,19 @@ export default function Home() {
           <div className="rounded-[2rem] border border-zinc-800 bg-zinc-900 p-8 lg:p-10">
             <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
               <div>
-                <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Early access</p>
+                <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">
+                  Early access
+                </p>
                 <h3 className="mt-3 text-3xl font-semibold tracking-tight text-white">
                   Be first when Volt launches.
                 </h3>
                 <p className="mt-4 max-w-2xl text-base leading-8 text-zinc-400">
-                  Join the waitlist for historical contract tracking, options move attribution, and a cleaner way to review why your trades worked.
+                  Join the waitlist for historical contract tracking, options move
+                  attribution, and a cleaner way to review why your trades worked.
                 </p>
               </div>
-              <div className="flex flex-col gap-3 sm:flex-row lg:flex-col lg:min-w-[320px]">
+
+              <div className="flex flex-col gap-3 sm:flex-row lg:min-w-[320px] lg:flex-col">
                 <input
                   type="email"
                   placeholder="Email address"
@@ -584,10 +744,17 @@ export default function Home() {
             <p className="font-medium text-zinc-300">Volt</p>
             <p className="mt-1">Historical options intelligence for retail traders.</p>
           </div>
+
           <div className="flex gap-6">
-            <a href="#product" className="transition hover:text-white">Product</a>
-            <a href="#features" className="transition hover:text-white">Features</a>
-            <a href="#waitlist" className="transition hover:text-white">Waitlist</a>
+            <a href="#product" className="transition hover:text-white">
+              Product
+            </a>
+            <a href="#features" className="transition hover:text-white">
+              Features
+            </a>
+            <a href="#waitlist" className="transition hover:text-white">
+              Waitlist
+            </a>
           </div>
         </div>
       </footer>
