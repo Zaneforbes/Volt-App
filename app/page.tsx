@@ -123,17 +123,18 @@ function MockDashboard() {
   const selected = watchlist[0];
   const stats = { IVR: "48", IVP: "72", "Relative volume": "1.9x", "Day volume": "18.6K" };
   const environmentSummary = getEnvironmentSummary(stats);
-  const statRows: [string, string][] = [
-    ["Last", selected.price],
-    ["Implied vol", selected.iv],
-    ["IVR", stats.IVR],
-    ["IVP", stats.IVP],
-    ["Relative volume", stats["Relative volume"]],
-    ["Day volume", stats["Day volume"]],
-    ["Volume", selected.volume],
-    ["Open interest", selected.oi],
-    ["Spread", "$0.14"],
-    ["Delta", ".42"],
+const statRows: [string, string][] = [
+  ["Last", selected.price],
+  ["Implied vol", selected.iv],
+  ["IVR", stats.IVR],
+  ["IVP", stats.IVP],
+  ["Relative volume", stats["Relative volume"]],
+  ["Day volume", stats["Day volume"]],
+  ["Volume", selected.volume],
+  ["Open interest", selected.oi],
+  ["Spread", "$0.14"],
+  ["Delta", ".42"],
+];
   ];
   const contributionRows: [string, string, string, string][] = [
     ["Underlying move", "+$1.12", "61%", "High"],
@@ -165,12 +166,25 @@ function MockDashboard() {
       <div className="grid gap-0 xl:grid-cols-[260px_1fr]">
         <aside className="hidden border-r border-zinc-800 p-4 xl:block">
           <div className="space-y-2">
-            {[
-              ["Overview", LineChart],
-              ["Journal", BookOpen],
-              ["Alerts", Bell],
-              ["Research", Sparkles],
-            ].map(([label, Icon], i) => {
+    {[
+  { label: "Overview", Icon: LineChart },
+  { label: "Journal", Icon: BookOpen },
+  { label: "Alerts", Icon: Bell },
+  { label: "Research", Icon: Sparkles },
+].map(({ label, Icon }, i) => (
+  <button
+    key={label}
+    className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm ${
+      i === 0 ? "bg-white text-zinc-950" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+    }`}
+  >
+    <span className="flex items-center gap-3">
+      <Icon className="h-4 w-4" />
+      {label}
+    </span>
+    {i === 0 ? <ChevronRight className="h-4 w-4" /> : null}
+  </button>
+))}
               const IconComp = Icon as React.ComponentType<{ className?: string }>;
               return (
                 <button
