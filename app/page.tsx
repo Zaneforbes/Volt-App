@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import {
   Bell,
   BookOpen,
@@ -474,6 +476,233 @@ function MockDashboard() {
   );
 }
 
+
+function MarketScanner() {
+  const [ticker, setTicker] = useState("AAPL");
+  const [data, setData] = useState<any>(null);
+  const [options, setOptions] = useState<any[]>([]);
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [expirationFilter, setExpirationFilter] = useState("all");
+
+  async function getData() {
+    const stockRes = await fetch(`/api/stock?ticker=${ticker}`);
+    const stockJson = await stockRes.json();
+    setData(stockJson);
+
+    const optionsRes = await fetch(`/api/options?ticker=${ticker}`);
+    const optionsJson = await optionsRes.json();
+    setOptions(optionsJson.contracts || []);
+  }
+
+  const spot = data?.close;
+
+  const expirations = Array.from(
+    new Set(options.map((option) => option.expiration))
+  ).filter(Boolean);
+
+  const filteredOptions = options
+    .filter((option) => {
+      if (!spot) return true;
+      return option.strike > spot * 0.9 && option.strike < spot * 1.1;
+    })
+    .filter((option) => typeFilter === "all" || option.type === typeFilter)
+    .filter(
+      (option) =>
+        expirationFilter === "all" || option.expiration === expirationFilter
+    );
+
+  const scoredOptions = filteredOptions.map((option) => {
+    const volume = option.volume || 0;
+    const openInterest = option.openInterest || 0;
+    const volumeOiRatio =
+      openInterest > 0 ? volume / openInterest : volume > 0 ? volume : 0;
+
+    let signal = "Normal";
+
+    if (volume >= 50 && volumeOiRatio >= 1) {
+      signal = "UNUSUAL";
+    } else if (volume >= 100 || volumeOiRatio >= 0.5) {
+      signal = "WATCH";
+    }
+
+    return { ...option, volumeOiRatio, signal };
+  });
+
+  const sortedOptions = [...scoredOptions].sort((a, b) => {
+    const score = (signal: string) =>
+      signal === "UNUSUAL" ? 3 : signal === "WATCH" ? 2 : 1;
+
+    return score(b.signal) - score(a.signal) || (b.volume || 0) - (a.volume || 0);
+  });
+
+  return (
+    <div className="rounded-[2rem] border border-zinc-800 bg-zinc-900 p-6 lg:p-8">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">
+            Live scanner
+          </p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+            Options activity scanner
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-400">
+            Pull live options snapshot data, filter near-the-money contracts,
+            and surface unusual volume versus open interest.
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <input
+            value={ticker}
+            onChange={(e) => setTicker(e.target.value.toUpperCase())}
+            className="h-11 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 text-sm text-white outline-none"
+          />
+          <button
+            onClick={getData}
+            className="h-11 rounded-2xl bg-white px-5 text-sm font-medium text-zinc-950"
+          >
+            Get Data
+          </button>
+        </div>
+      </div>
+
+      {data && (
+        <div className="mt-6 grid gap-3 sm:grid-cols-5">
+          {[
+            ["Ticker", data.ticker],
+            ["Open", `$${data.open}`],
+            ["High", `$${data.high}`],
+            ["Low", `$${data.low}`],
+            ["Close", `$${data.close}`],
+          ].map(([label, value]) => (
+            <div
+              key={label}
+              className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4"
+            >
+              <p className="text-xs text-zinc-500">{label}</p>
+              <p className="mt-1 text-sm font-semibold text-white">{value}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {sortedOptions.length > 0 && (
+        <div className="mt-6 overflow-x-auto">
+          <div className="mb-4 flex gap-3">
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-2 text-sm text-white"
+            >
+              <option value="all">All</option>
+              <option value="call">Calls</option>
+              <option value="put">Puts</option>
+            </select>
+
+            <select
+              value={expirationFilter}
+              onChange={(e) => setExpirationFilter(e.target.value)}
+              className="rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-2 text-sm text-white"
+            >
+              <option value="all">All expirations</option>
+              {expirations.map((expiration) => (
+                <option key={expiration} value={expiration}>
+                  {expiration}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <table className="w-full min-w-[1200px] border-collapse text-sm">
+            <thead>
+              <tr className="text-left text-zinc-400">
+                {[
+                  "Signal",
+                  "Contract",
+                  "Type",
+                  "Strike",
+                  "Exp",
+                  "Volume",
+                  "OI",
+                  "Vol/OI",
+                  "IV",
+                  "Delta",
+                  "Gamma",
+                  "Theta",
+                  "Vega",
+                ].map((header) => (
+                  <th key={header} className="border border-zinc-800 px-3 py-2">
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+
+            <tbody>
+              {sortedOptions.map((option) => {
+                const rowClass =
+                  option.signal === "UNUSUAL"
+                    ? "bg-red-500/20"
+                    : option.signal === "WATCH"
+                    ? "bg-yellow-500/10"
+                    : "bg-zinc-950";
+
+                return (
+                  <tr key={option.ticker} className={rowClass}>
+                    <td className="border border-zinc-800 px-3 py-2 font-semibold text-white">
+                      {option.signal}
+                    </td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
+                      {option.ticker}
+                    </td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
+                      {option.type}
+                    </td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
+                      ${option.strike}
+                    </td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
+                      {option.expiration}
+                    </td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
+                      {option.volume ?? "-"}
+                    </td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
+                      {option.openInterest ?? "-"}
+                    </td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
+                      {option.volumeOiRatio
+                        ? option.volumeOiRatio.toFixed(2)
+                        : "-"}
+                    </td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
+                      {option.impliedVolatility
+                        ? `${(option.impliedVolatility * 100).toFixed(1)}%`
+                        : "-"}
+                    </td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
+                      {option.delta?.toFixed?.(2) ?? "-"}
+                    </td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
+                      {option.gamma?.toFixed?.(4) ?? "-"}
+                    </td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
+                      {option.theta?.toFixed?.(2) ?? "-"}
+                    </td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
+                      {option.vega?.toFixed?.(2) ?? "-"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function FeatureCard({
   title,
   description,
@@ -578,6 +807,11 @@ export default function Home() {
               <MockDashboard />
             </div>
           </div>
+        </section>
+
+
+        <section className="mx-auto max-w-7xl px-6 py-16 lg:px-8" id="scanner">
+          <MarketScanner />
         </section>
 
         <section className="mx-auto max-w-7xl px-6 py-8 lg:px-8 lg:py-12">
