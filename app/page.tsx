@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Bell,
   BookOpen,
@@ -94,42 +94,26 @@ function getStatMeta(label: string, value: string) {
   const num = parseFloat(String(value).replace(/[^\d.\-]/g, "")) || 0;
 
   if (label === "IVR") {
-    if (num >= 80) {
-      return { badge: "Extreme", tone: "border-yellow-500/30 bg-yellow-500/10" };
-    }
-    if (num >= 50) {
-      return { badge: "Elevated", tone: "border-zinc-700 bg-zinc-900/80" };
-    }
+    if (num >= 80) return { badge: "Extreme", tone: "border-yellow-500/30 bg-yellow-500/10" };
+    if (num >= 50) return { badge: "Elevated", tone: "border-zinc-700 bg-zinc-900/80" };
     return { badge: "Low", tone: "border-zinc-800 bg-transparent" };
   }
 
   if (label === "IVP") {
-    if (num >= 80) {
-      return { badge: "Very rich", tone: "border-yellow-500/30 bg-yellow-500/10" };
-    }
-    if (num >= 60) {
-      return { badge: "Rich", tone: "border-zinc-700 bg-zinc-900/80" };
-    }
+    if (num >= 80) return { badge: "Very rich", tone: "border-yellow-500/30 bg-yellow-500/10" };
+    if (num >= 60) return { badge: "Rich", tone: "border-zinc-700 bg-zinc-900/80" };
     return { badge: null, tone: "border-zinc-800 bg-transparent" };
   }
 
   if (label === "Relative volume") {
-    if (num >= 2) {
-      return { badge: "Very active", tone: "border-green-500/30 bg-green-500/10" };
-    }
-    if (num >= 1.5) {
-      return { badge: "Active", tone: "border-zinc-700 bg-zinc-900/80" };
-    }
+    if (num >= 2) return { badge: "Very active", tone: "border-green-500/30 bg-green-500/10" };
+    if (num >= 1.5) return { badge: "Active", tone: "border-zinc-700 bg-zinc-900/80" };
     return { badge: null, tone: "border-zinc-800 bg-transparent" };
   }
 
   if (label === "Day volume") {
-    if (num >= 50) {
-      return { badge: "Heavy", tone: "border-green-500/30 bg-green-500/10" };
-    }
-    if (num >= 20) {
-      return { badge: "Above avg", tone: "border-zinc-700 bg-zinc-900/80" };
-    }
+    if (num >= 50) return { badge: "Heavy", tone: "border-green-500/30 bg-green-500/10" };
+    if (num >= 20) return { badge: "Above avg", tone: "border-zinc-700 bg-zinc-900/80" };
     return { badge: null, tone: "border-zinc-800 bg-transparent" };
   }
 
@@ -139,10 +123,8 @@ function getStatMeta(label: string, value: string) {
 function getEnvironmentSummary(stats: Record<string, string>) {
   const ivr = parseFloat(stats.IVR || "0") || 0;
   const ivp = parseFloat(stats.IVP || "0") || 0;
-  const relVol =
-    parseFloat(String(stats["Relative volume"] || "0").replace(/[^\d.\-]/g, "")) || 0;
-  const dayVol =
-    parseFloat(String(stats["Day volume"] || "0").replace(/[^\d.\-]/g, "")) || 0;
+  const relVol = parseFloat(String(stats["Relative volume"] || "0").replace(/[^\d.\-]/g, "")) || 0;
+  const dayVol = parseFloat(String(stats["Day volume"] || "0").replace(/[^\d.\-]/g, "")) || 0;
 
   const parts: string[] = [];
 
@@ -175,11 +157,8 @@ function getEnvironmentSummary(stats: Record<string, string>) {
 
 function StatRow({ label, value }: { label: string; value: string }) {
   const meta = getStatMeta(label, value);
-
   return (
-    <div
-      className={`flex items-center justify-between rounded-2xl border px-4 py-3 ${meta.tone}`}
-    >
+    <div className={`flex items-center justify-between rounded-2xl border px-4 py-3 ${meta.tone}`}>
       <span className="text-sm text-zinc-400">{label}</span>
       <div className="flex items-center gap-2">
         {meta.badge ? (
@@ -237,7 +216,6 @@ function MockDashboard() {
             <p className="text-xs text-zinc-500">Options tracking platform</p>
           </div>
         </div>
-
         <div className="hidden items-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-zinc-400 md:flex">
           <Search className="h-4 w-4" />
           <span className="text-sm">Search contracts</span>
@@ -274,10 +252,7 @@ function MockDashboard() {
             <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Watchlist</p>
             <div className="mt-3 space-y-2">
               {watchlist.slice(0, 3).map((item) => (
-                <div
-                  key={item.ticker}
-                  className="rounded-2xl border border-zinc-800 bg-zinc-950 px-3 py-3"
-                >
+                <div key={item.ticker} className="rounded-2xl border border-zinc-800 bg-zinc-950 px-3 py-3">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-white">{item.ticker}</p>
                     <p className="text-xs text-zinc-500">{item.move}</p>
@@ -328,13 +303,11 @@ function MockDashboard() {
                   <p className="text-sm font-medium text-white">Contract overview</p>
                   <Sparkles className="h-4 w-4 text-zinc-500" />
                 </div>
-
                 <div className="mt-4 space-y-3">
                   {statRows.map(([label, value]) => (
                     <StatRow key={label} label={label} value={value} />
                   ))}
                 </div>
-
                 <div className="mt-4 rounded-[1.5rem] border border-zinc-800 bg-zinc-950 p-4">
                   <div className="flex items-center justify-between gap-4">
                     <p className="text-sm font-medium text-white">Trade environment</p>
@@ -361,15 +334,11 @@ function MockDashboard() {
               <div className="mt-4 rounded-[1.5rem] border border-zinc-800 bg-zinc-950 p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                      Primary driver
-                    </p>
+                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Primary driver</p>
                     <p className="mt-2 text-base font-semibold text-white">Underlying move</p>
                   </div>
                   <div className="rounded-2xl border border-zinc-800 px-3 py-2 text-right">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-                      Actual move
-                    </p>
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">Actual move</p>
                     <p className="text-sm font-semibold text-white">+$1.84</p>
                   </div>
                 </div>
@@ -381,10 +350,7 @@ function MockDashboard() {
 
               <div className="mt-4 space-y-3">
                 {contributionRows.map(([label, value, pct, tag]) => (
-                  <div
-                    key={label}
-                    className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950 p-4"
-                  >
+                  <div key={label} className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950 p-4">
                     <div className="flex items-center justify-between gap-4">
                       <div>
                         <p className="text-sm font-medium text-white">{label}</p>
@@ -395,7 +361,6 @@ function MockDashboard() {
                         <p className="mt-1 text-xs text-zinc-500">{pct}</p>
                       </div>
                     </div>
-
                     <div className="mt-3 flex items-center justify-between gap-3">
                       <div className="h-2 flex-1 overflow-hidden rounded-full bg-zinc-900">
                         <div
@@ -418,13 +383,9 @@ function MockDashboard() {
                   <p className="text-sm font-medium text-white">Trade journal preview</p>
                   <FileText className="h-4 w-4 text-zinc-500" />
                 </div>
-
                 <div className="mt-4 space-y-3">
                   {recentJournal.map((entry) => (
-                    <div
-                      key={entry.title}
-                      className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950 p-4"
-                    >
+                    <div key={entry.title} className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950 p-4">
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <div className="flex items-center gap-2">
@@ -450,7 +411,6 @@ function MockDashboard() {
                   <p className="text-sm font-medium text-white">Replay timeline</p>
                   <Clock3 className="h-4 w-4 text-zinc-500" />
                 </div>
-
                 <div className="mt-4 space-y-3">
                   {[
                     ["9:35 AM", "Spread narrowed as volume accelerated"],
@@ -458,10 +418,7 @@ function MockDashboard() {
                     ["11:24 AM", "IV pushed above session average"],
                     ["1:42 PM", "Contract broke morning high"],
                   ].map(([time, text]) => (
-                    <div
-                      key={time}
-                      className="rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3"
-                    >
+                    <div key={time} className="rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3">
                       <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">{time}</p>
                       <p className="mt-2 text-sm text-zinc-300">{text}</p>
                     </div>
@@ -476,29 +433,47 @@ function MockDashboard() {
   );
 }
 
+// ─── Market Scanner ────────────────────────────────────────────────────────────
 
-function MarketScanner() {
-  const [ticker, setTicker] = useState("AAPL");
+function MarketScanner({ initialTicker }: { initialTicker?: string }) {
+  const [ticker, setTicker] = useState(initialTicker || "AAPL");
   const [data, setData] = useState<any>(null);
   const [options, setOptions] = useState<any[]>([]);
   const [typeFilter, setTypeFilter] = useState("all");
   const [expirationFilter, setExpirationFilter] = useState("all");
+  const [loading, setLoading] = useState(false);
 
-  async function getData() {
-    const stockRes = await fetch(`/api/stock?ticker=${ticker}`);
-    const stockJson = await stockRes.json();
-    setData(stockJson);
+  async function getData(overrideTicker?: string) {
+    const t = (overrideTicker || ticker).toUpperCase();
+    setLoading(true);
+    try {
+      const stockRes = await fetch(`/api/stock?ticker=${t}`);
+      const stockJson = await stockRes.json();
+      setData(stockJson);
 
-    const optionsRes = await fetch(`/api/options?ticker=${ticker}`);
-    const optionsJson = await optionsRes.json();
-    setOptions(optionsJson.contracts || []);
+      const optionsRes = await fetch(`/api/options?ticker=${t}`);
+      const optionsJson = await optionsRes.json();
+      setOptions(optionsJson.contracts || []);
+    } catch (err) {
+      console.error("Failed to fetch data", err);
+    } finally {
+      setLoading(false);
+    }
   }
+
+  // Auto-fetch when initialTicker changes (triggered from hero search)
+  useEffect(() => {
+    if (initialTicker) {
+      setTicker(initialTicker);
+      getData(initialTicker);
+    }
+  }, [initialTicker]);
 
   const spot = data?.close;
 
   const expirations = Array.from(
     new Set(options.map((option) => option.expiration))
-  ).filter(Boolean);
+  ).filter(Boolean) as string[];
 
   const filteredOptions = options
     .filter((option) => {
@@ -518,7 +493,6 @@ function MarketScanner() {
       openInterest > 0 ? volume / openInterest : volume > 0 ? volume : 0;
 
     let signal = "Normal";
-
     if (volume >= 50 && volumeOiRatio >= 1) {
       signal = "UNUSUAL";
     } else if (volume >= 100 || volumeOiRatio >= 0.5) {
@@ -531,7 +505,6 @@ function MarketScanner() {
   const sortedOptions = [...scoredOptions].sort((a, b) => {
     const score = (signal: string) =>
       signal === "UNUSUAL" ? 3 : signal === "WATCH" ? 2 : 1;
-
     return score(b.signal) - score(a.signal) || (b.volume || 0) - (a.volume || 0);
   });
 
@@ -539,9 +512,7 @@ function MarketScanner() {
     <div className="rounded-[2rem] border border-zinc-800 bg-zinc-900 p-6 lg:p-8">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">
-            Live scanner
-          </p>
+          <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Live scanner</p>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
             Options activity scanner
           </h2>
@@ -555,13 +526,16 @@ function MarketScanner() {
           <input
             value={ticker}
             onChange={(e) => setTicker(e.target.value.toUpperCase())}
-            className="h-11 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 text-sm text-white outline-none"
+            onKeyDown={(e) => e.key === "Enter" && getData()}
+            placeholder="Ticker"
+            className="h-11 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 text-sm text-white outline-none placeholder:text-zinc-500 focus:border-zinc-600"
           />
           <button
-            onClick={getData}
-            className="h-11 rounded-2xl bg-white px-5 text-sm font-medium text-zinc-950"
+            onClick={() => getData()}
+            disabled={loading}
+            className="h-11 rounded-2xl bg-white px-5 text-sm font-medium text-zinc-950 disabled:opacity-50"
           >
-            Get Data
+            {loading ? "Loading…" : "Get Data"}
           </button>
         </div>
       </div>
@@ -575,10 +549,7 @@ function MarketScanner() {
             ["Low", `$${data.low}`],
             ["Close", `$${data.close}`],
           ].map(([label, value]) => (
-            <div
-              key={label}
-              className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4"
-            >
+            <div key={label} className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
               <p className="text-xs text-zinc-500">{label}</p>
               <p className="mt-1 text-sm font-semibold text-white">{value}</p>
             </div>
@@ -617,19 +588,8 @@ function MarketScanner() {
             <thead>
               <tr className="text-left text-zinc-400">
                 {[
-                  "Signal",
-                  "Contract",
-                  "Type",
-                  "Strike",
-                  "Exp",
-                  "Volume",
-                  "OI",
-                  "Vol/OI",
-                  "IV",
-                  "Delta",
-                  "Gamma",
-                  "Theta",
-                  "Vega",
+                  "Signal", "Contract", "Type", "Strike", "Exp",
+                  "Volume", "OI", "Vol/OI", "IV", "Delta", "Gamma", "Theta", "Vega",
                 ].map((header) => (
                   <th key={header} className="border border-zinc-800 px-3 py-2">
                     {header}
@@ -637,9 +597,8 @@ function MarketScanner() {
                 ))}
               </tr>
             </thead>
-
             <tbody>
-              {sortedOptions.map((option) => {
+              {sortedOptions.map((option, i) => {
                 const rowClass =
                   option.signal === "UNUSUAL"
                     ? "bg-red-500/20"
@@ -648,37 +607,21 @@ function MarketScanner() {
                     : "bg-zinc-950";
 
                 return (
-                  <tr key={option.ticker} className={rowClass}>
+                  <tr key={`${option.ticker}-${i}`} className={rowClass}>
                     <td className="border border-zinc-800 px-3 py-2 font-semibold text-white">
                       {option.signal}
                     </td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">{option.ticker}</td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">{option.type}</td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">${option.strike}</td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">{option.expiration}</td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">{option.volume ?? "-"}</td>
+                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">{option.openInterest ?? "-"}</td>
                     <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
-                      {option.ticker}
+                      {option.volumeOiRatio ? option.volumeOiRatio.toFixed(2) : "-"}
                     </td>
                     <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
-                      {option.type}
-                    </td>
-                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
-                      ${option.strike}
-                    </td>
-                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
-                      {option.expiration}
-                    </td>
-                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
-                      {option.volume ?? "-"}
-                    </td>
-                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
-                      {option.openInterest ?? "-"}
-                    </td>
-                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
-                      {option.volumeOiRatio
-                        ? option.volumeOiRatio.toFixed(2)
-                        : "-"}
-                    </td>
-                    <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
-                      {option.impliedVolatility
-                        ? `${(option.impliedVolatility * 100).toFixed(1)}%`
-                        : "-"}
+                      {option.impliedVolatility ? `${(option.impliedVolatility * 100).toFixed(1)}%` : "-"}
                     </td>
                     <td className="border border-zinc-800 px-3 py-2 text-zinc-300">
                       {option.delta?.toFixed?.(2) ?? "-"}
@@ -699,9 +642,17 @@ function MarketScanner() {
           </table>
         </div>
       )}
+
+      {data && sortedOptions.length === 0 && !loading && (
+        <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-6 text-center text-sm text-zinc-500">
+          No near-the-money contracts found for {data.ticker}. Try adjusting the filters.
+        </div>
+      )}
     </div>
   );
 }
+
+// ─── Feature Card ──────────────────────────────────────────────────────────────
 
 function FeatureCard({
   title,
@@ -721,9 +672,25 @@ function FeatureCard({
   );
 }
 
+// ─── Home Page ─────────────────────────────────────────────────────────────────
+
 export default function Home() {
+  const [heroTicker, setHeroTicker] = useState("");
+  const [searchedTicker, setSearchedTicker] = useState<string | undefined>(undefined);
+  const scannerRef = useRef<HTMLElement>(null);
+
+  function handleHeroSearch() {
+    const t = heroTicker.trim().toUpperCase();
+    if (!t) return;
+    setSearchedTicker(t);
+    setTimeout(() => {
+      scannerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  }
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
+      {/* Header */}
       <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
           <div className="flex items-center gap-3">
@@ -737,18 +704,10 @@ export default function Home() {
           </div>
 
           <nav className="hidden items-center gap-8 text-sm text-zinc-400 md:flex">
-            <a href="#product" className="transition hover:text-white">
-              Product
-            </a>
-            <a href="#features" className="transition hover:text-white">
-              Features
-            </a>
-            <a href="#how-it-works" className="transition hover:text-white">
-              How it works
-            </a>
-            <a href="#waitlist" className="transition hover:text-white">
-              Waitlist
-            </a>
+            <a href="#product" className="transition hover:text-white">Product</a>
+            <a href="#features" className="transition hover:text-white">Features</a>
+            <a href="#how-it-works" className="transition hover:text-white">How it works</a>
+            <a href="#waitlist" className="transition hover:text-white">Waitlist</a>
           </nav>
 
           <button className="rounded-2xl bg-white px-4 py-2 text-sm font-medium text-zinc-950 transition hover:opacity-90">
@@ -758,6 +717,7 @@ export default function Home() {
       </header>
 
       <main>
+        {/* Hero */}
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_35%)]" />
 
@@ -776,30 +736,28 @@ export default function Home() {
                 journal review, and real move decomposition into one minimalist website.
               </p>
 
-              <div
-                className="mt-10 flex max-w-xl flex-col gap-3 sm:flex-row"
-                id="waitlist"
-              >
+              {/* Hero search — scrolls to scanner */}
+              <div className="mt-10 flex max-w-xl flex-col gap-3 sm:flex-row" id="waitlist">
                 <input
-                  type="email"
-                  placeholder="Enter your email"
+                  type="text"
+                  value={heroTicker}
+                  onChange={(e) => setHeroTicker(e.target.value.toUpperCase())}
+                  onKeyDown={(e) => e.key === "Enter" && handleHeroSearch()}
+                  placeholder="Enter a ticker (e.g. NVDA)"
                   className="h-12 flex-1 rounded-2xl border border-zinc-800 bg-zinc-900 px-4 text-sm outline-none placeholder:text-zinc-500 focus:border-zinc-600"
                 />
-                <button className="h-12 rounded-2xl bg-white px-6 text-sm font-medium text-zinc-950 transition hover:opacity-90">
-                  Get early access
+                <button
+                  onClick={handleHeroSearch}
+                  className="h-12 rounded-2xl bg-white px-6 text-sm font-medium text-zinc-950 transition hover:opacity-90"
+                >
+                  Search options
                 </button>
               </div>
 
               <div className="mt-10 flex flex-wrap gap-3 text-sm text-zinc-500">
-                <span className="rounded-full border border-zinc-800 px-3 py-1">
-                  Historical contract charts
-                </span>
-                <span className="rounded-full border border-zinc-800 px-3 py-1">
-                  What moved the contract
-                </span>
-                <span className="rounded-full border border-zinc-800 px-3 py-1">
-                  IVR / IVP / Relative Volume
-                </span>
+                <span className="rounded-full border border-zinc-800 px-3 py-1">Historical contract charts</span>
+                <span className="rounded-full border border-zinc-800 px-3 py-1">What moved the contract</span>
+                <span className="rounded-full border border-zinc-800 px-3 py-1">IVR / IVP / Relative Volume</span>
               </div>
             </div>
 
@@ -809,11 +767,12 @@ export default function Home() {
           </div>
         </section>
 
-
-        <section className="mx-auto max-w-7xl px-6 py-16 lg:px-8" id="scanner">
-          <MarketScanner />
+        {/* Scanner — ref attached so hero search can scroll here */}
+        <section ref={scannerRef} className="mx-auto max-w-7xl px-6 py-16 lg:px-8" id="scanner">
+          <MarketScanner initialTicker={searchedTicker} />
         </section>
 
+        {/* Stats strip */}
         <section className="mx-auto max-w-7xl px-6 py-8 lg:px-8 lg:py-12">
           <div className="grid gap-4 md:grid-cols-3">
             {[
@@ -821,19 +780,15 @@ export default function Home() {
               ["Positioning", "Website-first product"],
               ["Edge", "Explains contract repricing"],
             ].map(([label, value]) => (
-              <div
-                key={label}
-                className="rounded-[2rem] border border-zinc-800 bg-zinc-900 p-6"
-              >
+              <div key={label} className="rounded-[2rem] border border-zinc-800 bg-zinc-900 p-6">
                 <p className="text-sm text-zinc-500">{label}</p>
-                <p className="mt-2 text-2xl font-semibold tracking-tight text-white">
-                  {value}
-                </p>
+                <p className="mt-2 text-2xl font-semibold tracking-tight text-white">{value}</p>
               </div>
             ))}
           </div>
         </section>
 
+        {/* Features */}
         <section className="mx-auto max-w-7xl px-6 py-16 lg:px-8" id="features">
           <div className="max-w-3xl">
             <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Features</p>
@@ -865,41 +820,22 @@ export default function Home() {
           </div>
         </section>
 
-        <section
-          className="mx-auto max-w-7xl px-6 py-8 lg:px-8 lg:py-16"
-          id="how-it-works"
-        >
+        {/* How it works */}
+        <section className="mx-auto max-w-7xl px-6 py-8 lg:px-8 lg:py-16" id="how-it-works">
           <div className="grid gap-6 lg:grid-cols-[.95fr_1.05fr]">
             <div className="rounded-[2rem] border border-zinc-800 bg-zinc-900 p-6 lg:p-8">
-              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">
-                How it works
-              </p>
+              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">How it works</p>
               <h3 className="mt-4 text-3xl font-semibold tracking-tight text-white">
                 See the contract, the environment, and the reason for the move.
               </h3>
 
               <div className="mt-8 space-y-4">
                 {[
-                  [
-                    "1",
-                    "Track a contract",
-                    "Monitor price, IV, volume, spread, and open interest with a clean historical view.",
-                  ],
-                  [
-                    "2",
-                    "Read the environment",
-                    "Use IVR, IVP, relative volume, and day volume to quickly understand whether the setup is calm, elevated, or active.",
-                  ],
-                  [
-                    "3",
-                    "Review the attribution",
-                    "Break the move into direction, volatility, decay, and repricing so you can see why the trade actually worked or failed.",
-                  ],
+                  ["1", "Track a contract", "Monitor price, IV, volume, spread, and open interest with a clean historical view."],
+                  ["2", "Read the environment", "Use IVR, IVP, relative volume, and day volume to quickly understand whether the setup is calm, elevated, or active."],
+                  ["3", "Review the attribution", "Break the move into direction, volatility, decay, and repricing so you can see why the trade actually worked or failed."],
                 ].map(([num, title, text]) => (
-                  <div
-                    key={num}
-                    className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950 p-4"
-                  >
+                  <div key={num} className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950 p-4">
                     <div className="flex items-start gap-4">
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white text-sm font-semibold text-zinc-950">
                         {num}
@@ -915,9 +851,7 @@ export default function Home() {
             </div>
 
             <div className="rounded-[2rem] border border-zinc-800 bg-zinc-900 p-6 lg:p-8">
-              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">
-                Why it’s different
-              </p>
+              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Why it's different</p>
               <h3 className="mt-4 text-3xl font-semibold tracking-tight text-white">
                 Most tools show options data. Volt interprets it.
               </h3>
@@ -925,14 +859,11 @@ export default function Home() {
               <div className="mt-8 space-y-4">
                 {[
                   "Know whether the contract was stock-driven, vol-driven, or theta-dragged.",
-                  "Understand whether today’s activity is normal or unusual with relative volume and day volume context.",
+                  "Understand whether today's activity is normal or unusual with relative volume and day volume context.",
                   "Review trades later with timeline notes instead of trying to remember what the chart looked like.",
                   "Keep everything in a dark, minimal website that feels fast and premium instead of cluttered.",
                 ].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950 px-4 py-4 text-sm leading-7 text-zinc-300"
-                  >
+                  <div key={item} className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950 px-4 py-4 text-sm leading-7 text-zinc-300">
                     {item}
                   </div>
                 ))}
@@ -941,13 +872,12 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Early access CTA */}
         <section className="mx-auto max-w-7xl px-6 py-8 lg:px-8 lg:py-20">
           <div className="rounded-[2rem] border border-zinc-800 bg-zinc-900 p-8 lg:p-10">
             <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
               <div>
-                <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">
-                  Early access
-                </p>
+                <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Early access</p>
                 <h3 className="mt-3 text-3xl font-semibold tracking-tight text-white">
                   Be first when Volt launches.
                 </h3>
@@ -972,23 +902,17 @@ export default function Home() {
         </section>
       </main>
 
+      {/* Footer */}
       <footer className="border-t border-zinc-800">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-8 text-sm text-zinc-500 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div>
             <p className="font-medium text-zinc-300">Volt</p>
             <p className="mt-1">Historical options intelligence for retail traders.</p>
           </div>
-
           <div className="flex gap-6">
-            <a href="#product" className="transition hover:text-white">
-              Product
-            </a>
-            <a href="#features" className="transition hover:text-white">
-              Features
-            </a>
-            <a href="#waitlist" className="transition hover:text-white">
-              Waitlist
-            </a>
+            <a href="#product" className="transition hover:text-white">Product</a>
+            <a href="#features" className="transition hover:text-white">Features</a>
+            <a href="#waitlist" className="transition hover:text-white">Waitlist</a>
           </div>
         </div>
       </footer>
