@@ -10,30 +10,58 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const ticker = searchParams.get("ticker")?.toUpperCase() || "AAPL";
 
-  const url = `https://api.polygon.io/v3/snapshot/options/${ticker}?limit=20&apiKey=${apiKey}`;
+  // Fetch up to 250 contracts with greeks enabled
+  const url = `https://api.polygon.io/v3/snapshot/options/${ticker}?limit=250&contract_type=call&contract_type=put&apiKey=${apiKey}`;
 
-  const res = await fetch(url);
-  const data = await res.json();
+  try {
+    const res = await fetch(url, { next: { revalidate: 60 } });
+    const data = await res.json();
 
-  const contracts = data.results?.map((c: any) => ({
-    ticker: c.details?.ticker,
-    type: c.details?.contract_type,
-    strike: c.details?.strike_price,
-    expiration: c.details?.expiration_date,
-    bid: c.last_quote?.bid,
-    ask: c.last_quote?.ask,
-    last: c.last_trade?.price,
-    volume: c.day?.volume,
-    openInterest: c.open_interest,
-    impliedVolatility: c.implied_volatility,
-    delta: c.greeks?.delta,
-    gamma: c.greeks?.gamma,
-    theta: c.greeks?.theta,
-    vega: c.greeks?.vega,
-  }));
+    if (!data.results || data.results.length === 0) {
+      // Try without filters as fallback
+      const fallbackUrl = `https://api.polygon.io/v3/snapshot/options/${ticker}?limit=250&apiKey=${apiKey}`;
+      const fallbackRes = await fetch(fallbackUrl);
+      const fallbackData = await fallbackRes.json();
 
-  return NextResponse.json({
-    underlying: ticker,
-    contracts: contracts || [],
-  });
+      const contracts = (fallbackData.results || []).map((c: any) => ({
+        ticker: c.details?.ticker,
+        type: c.details?.contract_type,
+        strike: c.details?.strike_price,
+        expiration: c.details?.expiration_date,
+        bid: c.last_quote?.bid,
+        ask: c.last_quote?.ask,
+        last: c.last_trade?.price,
+        volume: c.day?.volume ?? 0,
+        openInterest: c.open_interest ?? 0,
+        impliedVolatility: c.implied_volatility,
+        delta: c.greeks?.delta,
+        gamma: c.greeks?.gamma,
+        theta: c.greeks?.theta,
+        vega: c.greeks?.vega,
+      }));
+
+      return NextResponse.json({ contracts });
+    }
+
+    const contracts = data.results.map((c: any) => ({
+      ticker: c.details?.ticker,
+      type: c.details?.contract_type,
+      strike: c.details?.strike_price,
+      expiration: c.details?.expiration_date,
+      bid: c.last_quote?.bid,
+      ask: c.last_quote?.ask,
+      last: c.last_trade?.price,
+      volume: c.day?.volume ?? 0,
+      openInterest: c.open_interest ?? 0,
+      impliedVolatility: c.implied_volatility,
+      delta: c.greeks?.delta,
+      gamma: c.greeks?.gamma,
+      theta: c.greeks?.theta,
+      vega: c.greeks?.vega,
+    }));
+
+    return NextResponse.json({ contracts });
+  } catch (err) {
+    return NextResponse.json({ error: "Failed to fetch options data", contracts: [] });
+  }
 }
